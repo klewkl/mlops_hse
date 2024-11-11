@@ -2,7 +2,6 @@ import pandas as pd
 import warnings
 from pathlib import Path
 from typing import Union, Tuple
-import pandas as pd
 from werkzeug.datastructures import FileStorage
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
@@ -126,9 +125,18 @@ def split_train_test(
     return train_test_split(X, y, test_size=test_size, random_state=random_state)
 
 ## Как отрабатывает код: 
-# train_file = 'titanic_train.csv'
-# test_file = 'titanic_test.csv'
+train_file = '../data/titanic/titanic_train.csv'
+test_file = '../data/titanic/titanic_test.csv'
 
-# X_train, y_train = validate_and_prepare_data(train_file, train=True)
-# X_train_split, X_val_split, y_train_split, y_val_split = split_train_test(X_train, y_train)
-# X_test = validate_and_prepare_data(test_file, train=False)
+X_train, y_train = validate_and_prepare_data(train_file, train=True)
+X_train_split, X_val_split, y_train_split, y_val_split = split_train_test(X_train, y_train)
+
+X_train_split['target'] = y_train_split
+X_train_split['split'] = 'train'
+X_val_split['target'] = y_val_split
+X_val_split['split'] = 'test'
+df = pd.concat([
+    X_train_split, X_val_split
+], ignore_index=True)
+df.to_csv('../data/test_data.csv', index=False)
+

@@ -9,45 +9,24 @@ import pickle
 import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
-
-model_dict = {
-    'logistic_regression': LogisticRegression,
-    'svm': LinearSVC,
-    'random_forest': RandomForestClassifier,
-    'knn': KNeighborsClassifier,
-    'decision_tree': DecisionTreeClassifier,
-}
-
-default_params_dict = {
-    'logistic_regression': {'C': 1, 'max_iter': 100},
-    'svm': {'C': 1, 'kernel': 'rbf'},
-    'random_forest': {'n_estimators': 100, 'max_depth': None},
-    'knn': {'n_neighbors': 5, 'algorithm': 'auto'},
-    'decision_tree': {'max_depth': None},
-}
+from settings import ModelParams, ModelClass
 
 MODEL_DIR = 'models'
 os.makedirs(MODEL_DIR, exist_ok=True)
 
-def create_model(model_type: str, model_params: Optional[Dict[str, Any]] = None) -> Any:
+def create_model(config: ModelParams) -> Any:
     """
     Creates a model pipeline.
 
-    :param model_type: Model type (logistic_regression, svm, etc.)
-    :param model_params: Hyperparameters for the model
+    :param config: ...
     :return: Model pipeline (sklearn)
     """
-    assert model_type in model_dict, f"Model {model_type} is not supported."
-
-    if model_params is None:
-        model_params = {}
-
-    model = model_dict[model_type](**model_params)
+    model = ModelClass.converters[config.ml_model_type](**config.ml_model_params.model_dump())
 
     return model
 
 
-def train_and_save_model(X: pd.DataFrame, y: pd.Series, model_type: str, model_params: Optional[Dict[str, Any]] = None):
+def train_and_save_model(X: pd.DataFrame, y: pd.Series, config: ModelParams = None):
     """
     Trains and saves the model.
 
@@ -58,11 +37,11 @@ def train_and_save_model(X: pd.DataFrame, y: pd.Series, model_type: str, model_p
     :return: Trained model
     """
 
-    model = create_model(model_type, model_params)
+    model = create_model(config)
 
     model.fit(X, y)
 
-    model_file = os.path.join(MODEL_DIR, f"{model_type}_model.pkl")
+    model_file = os.path.join(MODEL_DIR, f"{config.ml_model_type}_model.pkl")
     with open(model_file, 'wb') as f:
         pickle.dump(model, f)
 
