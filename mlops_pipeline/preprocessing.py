@@ -6,10 +6,9 @@ from werkzeug.datastructures import FileStorage
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 
-feature_columns = ['Age', 'Name', 'Pclass', 'Sex', 'SibSp', 'Parch', 'Ticket', 'Fare', 'Cabin', 'Embarked']
+feature_columns = ['Age', 'Name', 'Pclass', 'Sex', 'SibSp', 'Parch', 'Fare', 'Embarked']
 target_column = 'Survived'
 all_columns = feature_columns + [target_column]
-
 
 def validate_and_prepare_data(
         file: Union[str, Path, FileStorage],
@@ -30,9 +29,9 @@ def validate_and_prepare_data(
     """
     try:
         if isinstance(file, FileStorage):
-            data = pd.read_csv(file.stream)
+            data = pd.read_csv(file.stream)  
         else:
-            data = pd.read_csv(file)
+            data = pd.read_csv(file)  
     except Exception as e:
         raise ValueError(f"Couldn't read file: {e}")
 
@@ -64,15 +63,12 @@ def validate_and_prepare_data(
             if col in ['Sex', 'Embarked']:
                 le = LabelEncoder()
                 X[col] = le.fit_transform(X[col].fillna('UNK')) 
-            elif col == 'Cabin':  
-                X[col] = X[col].fillna('UNK') 
             elif col == 'Name': 
                 X['Title'] = X['Name'].str.extract('([A-Za-z]+)\\.', expand=False)
                 X['Title'] = X['Title'].fillna('UNK')
                 le_title = LabelEncoder()
                 X['Title'] = le_title.fit_transform(X['Title'])
                 X.drop(columns=['Name'], inplace=True) 
-
 
         scaler = StandardScaler()
         X[num_cols] = scaler.fit_transform(X[num_cols])
@@ -90,8 +86,6 @@ def validate_and_prepare_data(
             if col in ['Sex', 'Embarked']:
                 le = LabelEncoder()
                 X[col] = le.fit_transform(X[col].fillna('UNK')) 
-            elif col == 'Cabin': 
-                X[col] = X[col].fillna('UNK')  
             elif col == 'Name': 
                 X['Title'] = X['Name'].str.extract('([A-Za-z]+)\\.', expand=False)
                 X['Title'] = X['Title'].fillna('UNK')
@@ -123,20 +117,3 @@ def split_train_test(
     :return: Train and validation sets (X_train, X_val, y_train, y_val).
     """
     return train_test_split(X, y, test_size=test_size, random_state=random_state)
-
-## Как отрабатывает код: 
-train_file = '../data/titanic/titanic_train.csv'
-test_file = '../data/titanic/titanic_test.csv'
-
-X_train, y_train = validate_and_prepare_data(train_file, train=True)
-X_train_split, X_val_split, y_train_split, y_val_split = split_train_test(X_train, y_train)
-
-X_train_split['target'] = y_train_split
-X_train_split['split'] = 'train'
-X_val_split['target'] = y_val_split
-X_val_split['split'] = 'test'
-df = pd.concat([
-    X_train_split, X_val_split
-], ignore_index=True)
-df.to_csv('../data/test_data.csv', index=False)
-

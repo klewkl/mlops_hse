@@ -49,7 +49,6 @@ class ModelClass(Enum):
     def converters(self):
         return self.__converters
 
-
 class TreeParams(BaseModel):
     max_depth: Optional[int] = Field(default=None)
     min_samples_split: int = Field(default=2)
