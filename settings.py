@@ -37,17 +37,16 @@ class ModelClass(Enum):
     knn = 'knn'
     decision_tree = 'decision_tree'
 
-    __converters = {
-        logreg: LogisticRegression,
-        svm: LinearSVC,
-        random_forest: RandomForestClassifier,
-        knn: KNeighborsClassifier,
-        decision_tree: DecisionTreeClassifier,
-    }
-
     @property
     def converters(self):
-        return self.__converters
+        return {
+            self.logreg: LogisticRegression,
+            self.svm: LinearSVC,
+            self.random_forest: RandomForestClassifier,
+            self.knn: KNeighborsClassifier,
+            self.decision_tree: DecisionTreeClassifier,
+        }
+
 
 class TreeParams(BaseModel):
     max_depth: Optional[int] = Field(default=None)
