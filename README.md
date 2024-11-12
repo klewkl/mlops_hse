@@ -6,7 +6,7 @@
 
 ## Models 
 
-Преложение обучение и фит нескольких кандидатов: "logistic_regression","svm","random_forest","knn", "decision_tree". 
+В качестве основных бейзлайнов нескольких кандидатов: "logistic_regression","svm","random_forest","knn", "decision_tree". 
 
 ## Handlers 
 
@@ -20,7 +20,7 @@
 
 ## Инструкция по запуску проекта c помощью FastApi 
 
-1. Необходимо выбрать ветку add_data_test_branch
+1. Необходимо выбрать ветку tmp-branch
 2. Склонировать себе локально репозиторий:
    Нажать на кнопку 'Code' справа на стартовой странице репозитория
    Скопировать http/ssh URL
