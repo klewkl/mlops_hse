@@ -1,0 +1,10 @@
+.ipynb_checkpoints/
+	__pycache__/
+	mlops-env/
+	mlops_pipeline/.ipynb_checkpoints/ml_pipeline-checkpoint.py
+	mlops_pipeline/.ipynb_checkpoints/streamlit-checkpoint.py
+	mlops_pipeline/__pycache__/ml_pipeline.cpython-312.pyc
+	mlops_pipeline/__pycache__/models.cpython-312.pyc
+	mlops_pipeline/__pycache__/preprocessing.cpython-312.pyc
+	model.pkl
+	models/
