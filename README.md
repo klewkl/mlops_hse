@@ -44,3 +44,9 @@
 7. Далее следовать инструкциям в Стримлите
 
    
+## Инструкция по запуску проекта c помощью GRPC 
+
+Шаги 1-3 сохраняются 
+4. Сгенерить необходимые файлы для запуска сервиса: `python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. grpc_app/model.proto`
+5. Запустить сервис: `python grpc_app/grpc_server.py `
+6. Запустить клиента: `python grpc_app/grpc_client.py`
