@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  uvicorn:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: uvicorn
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - ./app:/app
+    working_dir: /app
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - minio
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    command: server /data
+    ports:
+      - "9000:9000"
+    volumes:
+      - minio_data:/data
+    environment:
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+
+  streamlit:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: streamlit
+    command: streamlit run mlops_pipeline/streamlit.py --server.port 8501
+    volumes:
+      - ./app:/app
+    working_dir: /app
+    ports:
+      - "8501:8501"
+    depends_on:
+      uvicorn:
+        condition: service_started  
+      minio:
+        condition: service_started  
+    restart: on-failure  
+
+volumes:
+  minio_data:
+
+networks:
+  mynetwork:
+    driver: bridge

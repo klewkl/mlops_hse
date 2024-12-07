@@ -7,7 +7,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-FASTAPI_URL = "http://localhost:8000"  
+FASTAPI_URL = "http://uvicorn:8000"
 
 def fetch_model_list():
     try:

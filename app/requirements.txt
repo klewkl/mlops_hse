@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+minio
+dvc
+pandas
+numpy 
+scikit-learn
+seaborn
+streamlit
