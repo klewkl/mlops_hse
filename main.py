@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 import json
 import numpy as np
-
+from mlops_pipeline.minio_utils import upload_model_to_minio, upload_dataset_to_minio_and_track_with_dvc
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -21,12 +21,13 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 setts = Settings()
 
-
 class TrainRequestModel(BaseModel):
     ml_model_type: str  
     ml_model_params: Dict[str, Any]  
     data: str  # 
     target_column: str  
+
+import os
 
 @app.post('/train/')
 async def train_model(request: TrainRequestModel):
@@ -54,10 +55,25 @@ async def train_model(request: TrainRequestModel):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Data parsing and splitting failed: {str(e)}")
 
-    model.train(x_train, y_train)
-    model.save('models') 
+    datasets_dir = 'datasets'
+    if not os.path.exists(datasets_dir):
+        os.makedirs(datasets_dir)  
 
-    return {"status": "success", "message": f"Model {model_params.ml_model_type} trained and saved successfully!"}
+    local_dataset_path = os.path.join(datasets_dir, 'training_data.csv')
+    data_df.to_csv(local_dataset_path, index=False)
+    
+    bucket_name = "models-bucket"
+    dataset_object_name = f"{model_params.ml_model_type}_training_data.csv"
+    upload_dataset_to_minio_and_track_with_dvc(local_dataset_path, bucket_name, dataset_object_name)
+
+    model.train(x_train, y_train)
+    
+    local_model_path = model.save('models') 
+    
+    object_name = f"{model_params.ml_model_type}_model.pkl"
+    upload_model_to_minio(local_model_path, bucket_name, object_name)
+
+    return {"status": "success", "message": f"Model {model_params.ml_model_type} trained, saved locally, dataset and model uploaded to Minio!"}
 
 class PredictRequestModel(BaseModel):
     model_type: str  

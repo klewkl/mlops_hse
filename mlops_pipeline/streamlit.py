@@ -87,11 +87,13 @@ def streamlit_logic():
                     try:
                         response = requests.post(f"{FASTAPI_URL}/train/", json=payload)
                         if response.status_code == 200:
-                            st.success(f"Model {model_choice} trained and saved successfully!")
+                            success_message = response.json().get("message")
+                            st.success(success_message)
                         else:
                             st.error(f"Error training model: {response.text}")
                     except requests.exceptions.RequestException as e:
                         st.error(f"Request Error: {str(e)}")
+            
             
             if st.button("Make Prediction"):
                 with st.spinner(f'Making predictions with {model_choice}...'):

@@ -67,6 +67,9 @@ class Model:
         return params_dict
 
     def save(self, model_dir: str):
+        """
+        Saves the trained model to the given directory.
+        """
         if self.model is None:
             raise ValueError("Model is not initialized. Cannot save a model that is None.")
         
@@ -78,6 +81,7 @@ class Model:
             pickle.dump(self.model, f)
         
         print(f"Model saved at: {model_path}")
+        return model_path
 
     def load(self, model_dir: Path, model_type: Optional[str] = None):
         if self.model is None:
