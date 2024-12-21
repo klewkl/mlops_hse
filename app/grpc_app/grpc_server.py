@@ -2,11 +2,16 @@ import grpc
 from concurrent import futures
 import model_pb2
 import model_pb2_grpc
-import pickle
 import pandas as pd
 from io import StringIO
 import numpy as np
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, roc_curve, roc_auc_score
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    confusion_matrix,
+    roc_curve,
+    roc_auc_score,
+)
 from mlops_pipeline.ml_pipeline import Model, parse_data  #
 import logging
 
@@ -14,8 +19,8 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class ModelService(model_pb2_grpc.ModelServiceServicer):
 
+class ModelService(model_pb2_grpc.ModelServiceServicer):
     def TrainModel(self, request, context):
         try:
             model_params = request.ml_model_params
@@ -24,14 +29,19 @@ class ModelService(model_pb2_grpc.ModelServiceServicer):
             target_column = request.target_column
 
             data_df = pd.read_csv(StringIO(data_str))
-            x_train, y_train, x_test, y_test = parse_data(data_df, target=target_column, split=True)
+            x_train, y_train, x_test, y_test = parse_data(
+                data_df, target=target_column, split=True
+            )
 
             model = Model(model_params=model_params, model_type=model_type)
 
             model.train(x_train, y_train)
-            model.save('models') 
+            model.save("models")
 
-            return model_pb2.TrainResponse(status="success", message=f"Model {model_type} trained and saved successfully!")
+            return model_pb2.TrainResponse(
+                status="success",
+                message=f"Model {model_type} trained and saved successfully!",
+            )
         except Exception as e:
             logger.error(f"Error during training: {str(e)}")
             return model_pb2.TrainResponse(status="failure", message=f"Error: {str(e)}")
@@ -43,11 +53,13 @@ class ModelService(model_pb2_grpc.ModelServiceServicer):
             target_column = request.target_column
 
             model = Model()
-            model.load('models', model_type)
+            model.load("models", model_type)
 
             data_df = pd.read_csv(StringIO(data_str))
 
-            x_train, y_train, x_test, y_test = parse_data(data_df, target=target_column, split=True)
+            x_train, y_train, x_test, y_test = parse_data(
+                data_df, target=target_column, split=True
+            )
 
             predictions = model.predict(x_test)
 
@@ -57,7 +69,7 @@ class ModelService(model_pb2_grpc.ModelServiceServicer):
             accuracy = accuracy_score(y_test, predictions)
 
             class_report = None
-            if len(np.unique(y_test)) == 2: 
+            if len(np.unique(y_test)) == 2:
                 class_report = classification_report(y_test, predictions)
 
             cm = confusion_matrix(y_test, predictions)
@@ -75,7 +87,7 @@ class ModelService(model_pb2_grpc.ModelServiceServicer):
                 confusion_matrix=cm_list,
                 fpr=fpr.tolist(),
                 tpr=tpr.tolist(),
-                roc_auc=roc_auc
+                roc_auc=roc_auc,
             )
         except Exception as e:
             logger.error(f"Error during prediction: {str(e)}")
@@ -87,18 +99,18 @@ class ModelService(model_pb2_grpc.ModelServiceServicer):
                 confusion_matrix=[],
                 fpr=[],
                 tpr=[],
-                roc_auc=0.0
+                roc_auc=0.0,
             )
 
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     model_pb2_grpc.add_ModelServiceServicer_to_server(ModelService(), server)
-    server.add_insecure_port('[::]:50051')  # gRPC listens on port 50051
+    server.add_insecure_port("[::]:50051")  # gRPC listens on port 50051
     server.start()
     print("Server started at port 50051.")
     server.wait_for_termination()
 
-if __name__ == '__main__':
-    serve()
 
+if __name__ == "__main__":
+    serve()

@@ -12,7 +12,7 @@
 #         data=data_str,
 #         target_column=target_column
 #     )
-    
+
 #     response = stub.TrainModel(request)
 #     print(f"Train Response: {response.status} - {response.message}")
 
@@ -22,7 +22,7 @@
 #         data=data_str,
 #         target_column=target_column
 #     )
-    
+
 #     response = stub.PredictModel(request)
 #     print("Prediction Response:")
 #     print(f"Accuracy: {response.accuracy}")
@@ -41,7 +41,7 @@
 #     3.0,4.0,7.0
 #     5.0,6.0,11.0
 #     """
-    
+
 #     data = pd.read_csv(StringIO(uploaded_data))
 #     print("Data preview:")
 #     print(data.head())
@@ -70,7 +70,7 @@ import model_pb2
 import model_pb2_grpc
 import pandas as pd
 from io import StringIO
-import numpy as np
+
 
 def train_model(stub, model_type, model_params, data_str, target_column):
     # Convert model_params to a map<string, string> format
@@ -81,9 +81,9 @@ def train_model(stub, model_type, model_params, data_str, target_column):
         model_type=model_type,
         ml_model_params=model_params_map,  # Ensure it's passed as a map
         data=data_str,
-        target_column=target_column
+        target_column=target_column,
     )
-    
+
     try:
         # Call TrainModel RPC
         response = stub.TrainModel(request)
@@ -91,13 +91,12 @@ def train_model(stub, model_type, model_params, data_str, target_column):
     except grpc.RpcError as e:
         print(f"gRPC error: {e.code()} - {e.details()}")
 
+
 def predict_model(stub, model_type, data_str, target_column):
     request = model_pb2.PredictRequest(
-        model_type=model_type,
-        data=data_str,
-        target_column=target_column
+        model_type=model_type, data=data_str, target_column=target_column
     )
-    
+
     try:
         # Call PredictModel RPC
         response = stub.PredictModel(request)
@@ -109,9 +108,10 @@ def predict_model(stub, model_type, data_str, target_column):
     except grpc.RpcError as e:
         print(f"gRPC error: {e.code()} - {e.details()}")
 
+
 def run():
     # Create gRPC channel and stub
-    channel = grpc.insecure_channel('localhost:50051')
+    channel = grpc.insecure_channel("localhost:50051")
     stub = model_pb2_grpc.ModelServiceStub(channel)
 
     # Simulate CSV data
@@ -121,7 +121,7 @@ def run():
     3.0,4.0,7.0
     5.0,6.0,11.0
     """
-    
+
     data = pd.read_csv(StringIO(uploaded_data))
     print("Data preview:")
     print(data.head())
@@ -134,7 +134,7 @@ def run():
         "n_estimators": "100",
         "max_depth": "10",
         "min_samples_split": "2",
-        "min_samples_leaf": "1"
+        "min_samples_leaf": "1",
     }
 
     # Train the model
@@ -143,5 +143,6 @@ def run():
     # Make predictions using the trained model
     predict_model(stub, model_choice, uploaded_data, target_column)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run()
