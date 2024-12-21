@@ -119,7 +119,7 @@ def streamlit_logic():
 
                         if task_id and task_url:
                             st.write(f"Prediction Task ID: {task_id}")
-                            st.write(f"Inference results URL on Clear ML: [Task URL]({task_url})")
+                            st.write(f"Inference results URL on Clear ML: {task_url}")
 
                         st.subheader("Confusion Matrix")
                         fig, ax = plt.subplots()
