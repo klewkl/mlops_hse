@@ -36,8 +36,11 @@
 6. Далее запускаем в терминале `docker-compose up`
 7. Скопировать URL в браузер для поднятия Streamlit: `http://localhost:8501`
 8.  Далее следовать инструкциям в Streamlit
+9.  Url и Task ID на артефакты в Clear ML с обучения и инференса будут предоставлены пользователю в UI.
 
-Для запуска тестов: `PYTHONPATH=app pytest app/tests/test_minio_utils.py` из корневой диркетории. 
+## Инструкция по запуску Unit Тестов
+
+Для запуска тестов нужно вставить в терминал и выполнить: `PYTHONPATH=app pytest app/tests/test_minio_utils.py` из корневой диркетории. 
 
 --------- 
 # Ретро Readme
