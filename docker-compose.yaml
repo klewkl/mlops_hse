@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  uvicorn:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: uvicorn
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - ./app:/app
+    working_dir: /app
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - CLEARML_API_ACCESS_KEY=WG04MPD94Y31GF4KOXFUCZ64KWE70W
+      - CLEARML_API_SECRET_KEY=wamoYzJ1eyzx2ZXZ5Xq9sxE1U2fNH7wSW2tNRilrfFA-tHoDbW12mzL2cfTOquXY-4o
+      - CLEARML_API_SERVER=https://app.clear.ml
+    depends_on:
+      - minio
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    command: server /data
+    ports:
+      - "9000:9000"
+    volumes:
+      - minio_data:/data
+    environment:
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+
+  streamlit:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: streamlit
+    command: streamlit run mlops_pipeline/streamlit.py --server.port 8501
+    volumes:
+      - ./app:/app
+    working_dir: /app
+    ports:
+      - "8501:8501"
+    depends_on:
+      - uvicorn
+      - minio
+    restart: on-failure
+
+  clearml-agent:
+    image: allegroai/clearml-agent:latest
+    container_name: clearml-agent
+    environment:
+      CLEARML_AGENT_WORKER_NAME: "worker_1"
+      CLEARML_API_ACCESS_KEY: "WG04MPD94Y31GF4KOXFUCZ64KWE70W"
+      CLEARML_API_SECRET_KEY: "wamoYzJ1eyzx2ZXZ5Xq9sxE1U2fNH7wSW2tNRilrfFA-tHoDbW12mzL2cfTOquXY-4o"
+      CLEARML_API_SERVER: "https://app.clear.ml"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.clearml:/root/.clearml
+    depends_on:
+      - minio
+
+  clearml-server:
+    image: allegroai/clearml:latest
+    container_name: clearml-server
+    ports:
+      - "8080:8080" 
+      - "8081:8081"
+      - "8082:8082"
+    environment:
+      CLEARML_APPLY_MONGO_PATCH: "true"
+    volumes:
+      - clearml_data:/opt/clearml/data
+      - clearml_logs:/opt/clearml/logs
+    networks:
+      - mynetwork
+
+volumes:
+  minio_data:
+  clearml_data:
+  clearml_logs:
+
+networks:
+  mynetwork:
+    driver: bridge

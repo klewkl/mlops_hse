@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package model;
+
+service ModelService {
+    rpc TrainModel (TrainRequest) returns (TrainResponse);
+    rpc PredictModel (PredictRequest) returns (PredictResponse);
+}
+
+message TrainRequest {
+    string model_type = 1;  
+    map<string, string> ml_model_params = 2;
+    string data = 3;  
+    string target_column = 4;
+}
+
+message TrainResponse {
+    string status = 1;
+    string message = 2;
+}
+
+message PredictRequest {
+    string model_type = 1;
+    string data = 2;  
+    string target_column = 3;
+}
+
+message PredictResponse {
+    repeated float predictions = 1;
+    repeated float y_true = 2;
+    float accuracy = 3;
+    string classification_report = 4;
+    repeated int32 confusion_matrix = 5;
+    repeated float fpr = 6;
+    repeated float tpr = 7;
+    float roc_auc = 8;
+}
+
